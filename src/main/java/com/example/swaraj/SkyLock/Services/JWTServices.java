@@ -3,6 +3,8 @@ package com.example.swaraj.SkyLock.Services;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -48,8 +50,19 @@ public class JWTServices {
                 && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration)
                 .before(new Date());
+    }
+
+    public String extractTokenFromCookies(HttpServletRequest request){
+        if(request.getCookies() == null) return null;
+
+        for(Cookie cookie: request.getCookies()){
+            if("jwt".equals(cookie.getName())){
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 }

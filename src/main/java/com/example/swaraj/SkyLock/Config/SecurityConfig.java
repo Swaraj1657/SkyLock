@@ -1,6 +1,5 @@
 package com.example.swaraj.SkyLock.Config;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,15 +21,16 @@ public class SecurityConfig {
     private JwtFillter jwtFillter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(customize -> customize.disable());
         httpSecurity.authorizeHttpRequests(request -> request
-                .requestMatchers("/register","/login")
+                .requestMatchers("/register", "/login", "/registerPage", "/loginPage", "/css/**", "/js/**",
+                        "/images/**", "/logout")
                 .permitAll()
                 .anyRequest().authenticated())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFillter, UsernamePasswordAuthenticationFilter.class);
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFillter, UsernamePasswordAuthenticationFilter.class)
+                .logout(customize -> customize.disable());
 
         return httpSecurity.build();
     }
