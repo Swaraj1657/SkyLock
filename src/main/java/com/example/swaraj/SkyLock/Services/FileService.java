@@ -68,9 +68,9 @@ public class FileService {
         Users user = usersRepo.findByUsername(userName);
 
         long fileSize = file.getSize();
-//        if (fileSize > maxFileSize.toBytes()) {
-//            throw new RuntimeException("File exceeds upload limit");
-//        }
+        if (fileSize > maxFileSize.toBytes()) {
+            throw new RuntimeException("File exceeds upload limit");
+        }
 
         if (user.getUsedStorage() + fileSize > user.getMaxStorage()) {
             throw new RuntimeException("Storage Limit is exceeds");
