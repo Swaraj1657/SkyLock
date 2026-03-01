@@ -19,10 +19,10 @@ public class FileController {
     }
 
 
-    @PostMapping("/upload")
-    public ResponseEntity<?> uploadPage(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(required = false) String folderId) throws IOException {
-        return ResponseEntity.ok(fileService.uploadFile(file, folderId));
-    }
+//    @PostMapping("/upload")
+//    public ResponseEntity<?> uploadPage(
+//            @RequestParam("file") MultipartFile file,
+//            @RequestParam(required = false) String folderId) throws IOException {
+//        return ResponseEntity.ok(fileService.uploadFile(file, folderId));
+//    }
 }
