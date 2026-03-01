@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FileRepo extends JpaRepository<FileEntity, String> {
@@ -26,4 +27,6 @@ public interface FileRepo extends JpaRepository<FileEntity, String> {
     List<FileEntity> findByOwnerId(String ownerId);
 
     List<FileEntity> findByFolderIdAndOwnerId(String folderId, String ownerId);
+
+    Optional<FileEntity> findById(String fileId);
 }

@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
@@ -37,6 +38,11 @@ public class FileService {
         this.usersRepo = usersRepo;
         this.fileRepo = fileRepo;
         this.folderRepo = folderRepo;
+    }
+
+    private Users getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return usersRepo.findByUsername(auth.getName());
     }
 
     @Autowired
@@ -61,60 +67,28 @@ public class FileService {
         }
     }
 
-//    @Transactional
-//    public String uploadFile(MultipartFile file, String folderId) throws IOException {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        String userName = auth.getName();
-//        Users user = usersRepo.findByUsername(userName);
-//
-//        long fileSize = file.getSize();
-//        if (fileSize > maxFileSize.toBytes()) {
-//            throw new RuntimeException("File exceeds upload limit");
-//        }
-//
-//        if (user.getUsedStorage() + fileSize > user.getMaxStorage()) {
-//            throw new RuntimeException("Storage Limit is exceeds");
-//        }
-//
-//        Path basePath = Path.of(storagePath, "user_" + user.getId());
-//
-//        Path finalPath = basePath;
-//        Folder folder = null;
-//        System.out.println(folderId);
-//        if(StringUtils.hasText(folderId)){
-//            folder = folderRepo.findByIdIs(folderId);
-//            if (folder == null)
-//                throw new RuntimeException("Folder is not exists");
-//
-//            if (!folder.getOwner().getId().equals(user.getId()))
-//                throw new RuntimeException("Unauthorized access");
-//
-//            String relativePath = folderServices.buildFolderPath(folder);
-//            finalPath = basePath.resolve(relativePath);
-//            System.out.println(basePath);
-//
-//        }
-//        if (!Files.exists(finalPath)) {
-//            Files.createDirectories(finalPath);
-//        }
-//
-//        String filename = StringUtils.cleanPath(file.getOriginalFilename());
-//        Path filePath = finalPath.resolve(filename);
-//        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-//
-//        FileEntity fileEntity = FileEntity.builder()
-//                .filename(filename)
-//                .path(String.valueOf(filePath))
-//                .size(fileSize)
-//                .owner(user)
-//                .folder(folder)
-//                .uploadedAt(LocalDateTime.now())
-//                .build();
-//
-//        fileRepo.save(fileEntity);
-//        user.setUsedStorage(user.getUsedStorage() + fileSize);
-//        usersRepo.save(user);
-//
-//        return "File uploaded successfully";
-//    }
+
+    @Transactional
+    public String deleteFile(String fileId){
+        Users user = getCurrentUser();
+        Optional<FileEntity> opt = fileRepo.findById(fileId);
+        if(opt.isEmpty()){
+            throw new RuntimeException("File is not found");
+        }
+        FileEntity file = opt.get();
+        if(!file.getOwner().getId().equals(user.getId())){
+            throw new RuntimeException("File is not belong to user");
+        }
+        try {
+            Path filePath = Path.of(file.getPath());
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        user.setUsedStorage(user.getUsedStorage()-file.getSize());
+        usersRepo.save(user);
+
+        fileRepo.delete(file);
+        return ("File removed Sucessfully");
+    }
 }

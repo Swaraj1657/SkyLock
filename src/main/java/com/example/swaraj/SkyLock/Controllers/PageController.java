@@ -15,6 +15,14 @@ import java.io.IOException;
 public class PageController {
 
 
+    @GetMapping("/")
+    public String indexPage(Authentication authentication){
+        if(authentication != null && authentication.isAuthenticated()){
+            return "redirect:/home";
+        }
+        return "login";
+    }
+
 
     @GetMapping("/registerPage")
     public String registerPage() {
