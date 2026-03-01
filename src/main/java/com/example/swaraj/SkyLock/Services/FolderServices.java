@@ -13,36 +13,35 @@ import java.util.List;
 @Service
 public class FolderServices {
 
-    private UsersRepo usersRepo;
-    private FolderRepo folderRepo;
-
-
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    String username = auth.getName();
-    Users user = usersRepo.findByUsername(username);
+    private final UsersRepo usersRepo;
+    private final FolderRepo folderRepo;
 
     public FolderServices(FolderRepo folderRepo, UsersRepo usersRepo) {
         this.folderRepo = folderRepo;
         this.usersRepo = usersRepo;
     }
 
-    public String buildFolderPath(Folder folder){
-        if(folder.getParent() != null){
+    private Users getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return usersRepo.findByUsername(auth.getName());
+    }
+
+    public String buildFolderPath(Folder folder) {
+        if (folder.getParent() == null) {
             return folder.getName();
         }
         return buildFolderPath(folder.getParent()) + "/" + folder.getName();
     }
 
-
-    public String createFolder(String name, String parentName){
+    public String createFolder(String name, String parentId) {
+        Users user = getCurrentUser();
 
         Folder parent = null;
-        String parentId = folderRepo.findByName(parentName);
-        if(parentId != null){
+        if (parentId != null && !parentId.isEmpty()) {
             parent = folderRepo.findByIdIs(parentId);
-            if(parent == null)
+            if (parent == null)
                 throw new RuntimeException("Folder is not Found");
-            if(!parent.getOwner().getId().equals(user.getId()))
+            if (!parent.getOwner().getId().equals(user.getId()))
                 throw new RuntimeException("User is Not Authorized");
         }
 
@@ -53,12 +52,13 @@ public class FolderServices {
 
         folderRepo.save(folder);
 
-        return "Folder Created Sucessfully";
+        return "Folder Created Successfully";
     }
 
-    public List<Folder> viewFolder(String parentName){
+    public List<Folder> viewFolder(String parentName) {
+        Users user = getCurrentUser();
         String parentId = folderRepo.findByName(parentName);
-        List<Folder> folders = folderRepo.findFolderByIdAndUser(parentId,user.getId());
+        List<Folder> folders = folderRepo.findFolderByIdAndUser(parentId, user.getId());
         return folders;
     }
 }

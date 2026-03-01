@@ -1,26 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
 <head>
-    <title>Register</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyLock — Create Account</title>
+    <meta name="description" content="Create your SkyLock cloud storage account.">
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
+
 <body>
 
-<h2>Register</h2>
+    <div class="auth-card">
+        <div class="auth-brand">
+            <div class="auth-brand-icon">S</div>
+            <h1>SkyLock</h1>
+        </div>
 
-<form action="/register" method="post">
-    <label>Username:</label>
-    <input type="text" name="username" required><br><br>
+        <p class="auth-subtitle">Create your secure cloud workspace</p>
 
-    <label>Password:</label>
-    <input type="password" name="password" required><br><br>
+        <!-- Error message -->
+        <div class="auth-error" th:if="${param.error}">
+            Registration failed. Username may already exist.
+        </div>
 
-    <label>Email:</label>
-    <input type="email" name="email" required><br><br>
+        <form class="auth-form" action="/register" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required>
+            </div>
 
-    <button type="submit">Register</button>
-</form>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
 
-<a href="/loginPage">Go to Login</a>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+            </div>
+
+            <button type="submit" class="auth-submit">Create Account</button>
+        </form>
+
+        <p class="auth-link">
+            Already have an account? <a href="/loginPage">Sign in</a>
+        </p>
+    </div>
 
 </body>
+
 </html>
