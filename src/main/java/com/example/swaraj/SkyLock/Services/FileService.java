@@ -8,8 +8,11 @@ import com.example.swaraj.SkyLock.Models.Users;
 import com.example.swaraj.SkyLock.Repo.FileRepo;
 import com.example.swaraj.SkyLock.Repo.FolderRepo;
 import com.example.swaraj.SkyLock.Repo.UsersRepo;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -76,6 +80,8 @@ public class FileService {
             throw new RuntimeException("File is not found");
         }
         FileEntity file = opt.get();
+        System.out.println("Logged User: " + user.getId());
+        System.out.println("File Owner: " + file.getOwner().getId());
         if(!file.getOwner().getId().equals(user.getId())){
             throw new RuntimeException("File is not belong to user");
         }
@@ -90,5 +96,32 @@ public class FileService {
 
         fileRepo.delete(file);
         return ("File removed Sucessfully");
+    }
+
+    @Transactional
+    public Resource downloadFile(String fileId) throws MalformedURLException {
+        Users user = getCurrentUser();
+        FileEntity file = fileRepo.findById(fileId)
+                .orElseThrow(() ->
+                        new RuntimeException("File not found"));
+
+
+        if (!file.getOwner()
+                .getId()
+                .equals(user.getId())) {
+
+            throw new RuntimeException("Unauthorized");
+        }
+
+        Path filePath = Path.of(file.getPath());
+
+        Resource resource =
+                new UrlResource(filePath.toUri());
+
+        if (!resource.exists()) {
+            throw new RuntimeException("Physical file missing");
+        }
+
+        return resource;
     }
 }

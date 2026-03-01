@@ -5,6 +5,7 @@ import com.example.swaraj.SkyLock.Models.Users;
 import com.example.swaraj.SkyLock.Repo.FileRepo;
 import com.example.swaraj.SkyLock.Repo.UsersRepo;
 import com.example.swaraj.SkyLock.Services.DashBoardService;
+import com.example.swaraj.SkyLock.Services.FileService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -28,11 +29,14 @@ public class DashBoardController {
     private final DashBoardService dashBoardService;
     private final FileRepo fileRepo;
     private final UsersRepo usersRepo;
+    private final FileService fileService;
 
-    public DashBoardController(DashBoardService dashBoardService, FileRepo fileRepo, UsersRepo usersRepo) {
+    public DashBoardController(DashBoardService dashBoardService, FileRepo fileRepo, UsersRepo usersRepo,
+            FileService fileService) {
         this.dashBoardService = dashBoardService;
         this.fileRepo = fileRepo;
         this.usersRepo = usersRepo;
+        this.fileService = fileService;
     }
 
     @GetMapping("/dashboard")
@@ -42,63 +46,70 @@ public class DashBoardController {
     }
 
     @DeleteMapping("/files/{fileId}")
-    public ResponseEntity<?> deleteFile(@PathVariable String fileId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Users user = usersRepo.findByUsername(auth.getName());
+    public ResponseEntity<?> deleteFile(
+            @PathVariable String fileId) {
 
-        Optional<FileEntity> optFile = fileRepo.findById(fileId);
-        if (optFile.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        FileEntity file = optFile.get();
-        if (!file.getOwner().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).body("Unauthorized");
-        }
-
-        // Delete physical file
         try {
-            Path filePath = Path.of(file.getPath());
-            Files.deleteIfExists(filePath);
-        } catch (IOException e) {
-            // Log but continue to remove DB record
+
+            fileService.deleteFile(fileId);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message",
+                            "File deleted successfully"));
+
+        } catch (RuntimeException e) {
+
+            if (e.getMessage()
+                    .equals("File not found")) {
+                return ResponseEntity.notFound().build();
+            }
+
+            if (e.getMessage()
+                    .equals("Unauthorized")) {
+                return ResponseEntity
+                        .status(403)
+                        .body("Unauthorized");
+            }
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
         }
-
-        // Update storage
-        user.setUsedStorage(user.getUsedStorage() - file.getSize());
-        usersRepo.save(user);
-
-        fileRepo.delete(file);
-
-        return ResponseEntity.ok(Map.of("message", "File deleted successfully"));
     }
 
     @GetMapping("/files/download/{fileId}")
-    public ResponseEntity<?> downloadFile(@PathVariable String fileId) throws MalformedURLException {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Users user = usersRepo.findByUsername(auth.getName());
+    public ResponseEntity<?> downloadFile(
+            @PathVariable String fileId)
+            throws MalformedURLException {
 
-        Optional<FileEntity> optFile = fileRepo.findById(fileId);
-        if (optFile.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        try {
+            Resource resource = fileService.downloadFile(fileId);
+
+            return ResponseEntity.ok()
+                    .contentType(
+                            MediaType.APPLICATION_OCTET_STREAM)
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" +
+                                    resource.getFilename() + "\"")
+                    .body(resource);
+
+        } catch (RuntimeException e) {
+
+            if (e.getMessage()
+                    .equals("File not found")) {
+                return ResponseEntity.notFound().build();
+            }
+            if (e.getMessage()
+                    .equals("Unauthorized")) {
+                return ResponseEntity
+                        .status(403)
+                        .body("Unauthorized");
+            }
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
         }
-
-        FileEntity file = optFile.get();
-        if (!file.getOwner().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).body("Unauthorized");
-        }
-
-        Path filePath = Path.of(file.getPath());
-        Resource resource = new UrlResource(filePath.toUri());
-
-        if (!resource.exists()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + file.getFilename() + "\"")
-                .body(resource);
     }
 }
