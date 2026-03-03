@@ -80,8 +80,7 @@ public class FileService {
             throw new RuntimeException("File is not found");
         }
         FileEntity file = opt.get();
-        System.out.println("Logged User: " + user.getId());
-        System.out.println("File Owner: " + file.getOwner().getId());
+
         if(!file.getOwner().getId().equals(user.getId())){
             throw new RuntimeException("File is not belong to user");
         }
