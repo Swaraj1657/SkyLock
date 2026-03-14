@@ -7,6 +7,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+
 @Service
 public class EmailServices {
 
@@ -22,57 +27,39 @@ public class EmailServices {
         this.userService = userService;
     }
 
-//    public void sendMail(String to, String subject, String body)
-//            throws MessagingException {
-//
-//        System.out.println("MAIL SENDING STARTED → " + to);
-//
-//        MimeMessage message = mailSender.createMimeMessage();
-//
-//        MimeMessageHelper helper =
-//                new MimeMessageHelper(message, true, "UTF-8");
-//
-//        // ✅ VERY IMPORTANT (Gmail Trust)
-//        helper.setFrom("SkyLock <admin@skylock.dpdns.org>");
-//
-//        // ✅ Alignment fix
-//        helper.setReplyTo("admin@skylock.dpdns.org");
-//
-//        helper.setTo(to);
-//        helper.setSubject(subject);
-//
-//        // ✅ Send BOTH HTML + TEXT fallback
-//        helper.setText(
-//                "SkyLock Notification",   // plain text
-//                body                      // html
-//        );
-//
-//        mailSender.send(message);
-//
-//        System.out.println("MAIL SENT SUCCESSFULLY ✅");
-//    }
+    private String loadTemplate(String path) throws IOException, IOException {
+        InputStream inputStream = getClass().getResourceAsStream(path);
+        return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+    }
 
-    public void sendVerificationMail(String username) throws MessagingException {
+    public void sendWelcomeMail(Users user) throws MessagingException, IOException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        helper.setFrom("SkyLock<admin@skylock.dpdns.org>");
+        helper.setTo(user.getEmail());
+        helper.setSubject("Welcome to SkyLock");
+        String body = loadTemplate("/templates/emails/welcome.html");
+        body = body.replace("{{username}}", user.getUsername());
+        helper.setText(body, true);
+        mailSender.send(message);
+    }
+
+    public void sendVerificationMail(String username) throws MessagingException, IOException {
         Users user = userService.findByUsername(username);
-        System.out.println(user.getEmail());
         String token = jwtServices.genrateValidationToken(username);
         String verificationLink =
                 "http://skylock.dpdns.org/verify-email?token=" + token;
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper =  new MimeMessageHelper(message, true , "UTF-8");
-        helper.setFrom("SkyLock<admin@skylock.dpdns.org>");
+        helper.setFrom("SkyLockEmailVerify<emailverify@skylock.dpdns.org>");
         helper.setTo(user.getEmail());
         helper.setSubject("Verify your email - SkyLock");
 
-        String body = "Hello " + user.getUsername() + ",\n\n"
-                + "Please verify your email by clicking the link below:\n\n"
-                + verificationLink + "\n\n"
-                + "This link will expire in 10 minutes.\n\n"
-                + "SkyLock Security Team";
-
-        helper.setText(body);
-
+        String body = loadTemplate("/templates/emails/verification.html");
+        body = body.replace("{{username}}", user.getUsername());
+        body = body.replace("{{verificationLink}}", verificationLink);
+        helper.setText(body,true);
         mailSender.send(message);
     }
 
@@ -90,4 +77,29 @@ public class EmailServices {
 
         return "Email Verified";
     }
+
+    public void resetPasswordEmail(Users user) throws MessagingException, IOException {
+        String token = jwtServices.genrateValidationToken(user.getUsername());
+        user.setResetToken(token);
+        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(10));
+        userService.save(user);
+        String resetPassLink =
+                "http://skylock.dpdns.org/resetPassword?token=" + token;
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper =  new MimeMessageHelper(message, true , "UTF-8");
+        helper.setFrom("SkyLockResetPassword<resetpassword@skylock.dpdns.org>");
+        helper.setTo(user.getEmail());
+        helper.setSubject("Change Your Password - SkyLock");
+
+        String body = loadTemplate("/templates/emails/resetpassword.html");
+
+        body = body.replace("{{username}}", user.getUsername());
+        body = body.replace("{{resetPassLink}}", resetPassLink);
+
+        helper.setText(body, true);
+
+        mailSender.send(message);
+    }
+
 }

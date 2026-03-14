@@ -72,6 +72,9 @@ public class Users {
                 '}';
     }
 
+    private String resetToken;
+    private LocalDateTime resetTokenExpiry;
+
     public Users orElseThrow() {
         return null;
     }

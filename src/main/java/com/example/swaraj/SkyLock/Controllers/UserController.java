@@ -3,11 +3,13 @@ package com.example.swaraj.SkyLock.Controllers;
 import com.example.swaraj.SkyLock.Models.Users;
 import com.example.swaraj.SkyLock.Services.JWTServices;
 import com.example.swaraj.SkyLock.Services.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -83,15 +85,6 @@ public class UserController {
         return "redirect:/loginPage";
     }
 
-//    @GetMapping("/users")
-//    public String showUsers(Model model) {
-//
-//        List<Users> users = service.findAllUser();
-//        model.addAttribute("users", users);
-//
-//        return "users";
-//    }
-
     @GetMapping("/home")
     public String home(Model model){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -100,4 +93,19 @@ public class UserController {
         return "home";
     }
 
+    @PostMapping("/forgotPassword")
+    public String forgotPassword(@RequestParam String username) throws MessagingException, IOException {
+        return service.forgotPassword(username);
+    }
+
+    @PostMapping("/resetPassword")
+    public String resetPassword( @RequestParam String token,
+                                 @RequestParam String password,
+                                 @RequestParam String confirmPassword){
+        boolean result = service.resetPassword(token,password,confirmPassword);
+        if(!result){
+            return "redirect:/forgotPassword?error";
+        }
+        return "redirect:/loginPage?resetSuccess";
+    }
 }

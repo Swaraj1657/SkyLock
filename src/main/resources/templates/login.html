@@ -24,6 +24,16 @@
             Invalid username or password. Please try again.
         </div>
 
+        <!-- Password reset success -->
+        <div class="auth-success" th:if="${param.resetSuccess}">
+            Password reset successful! You can now sign in.
+        </div>
+
+        <!-- Email verified success -->
+        <div class="auth-success" th:if="${param.verified}">
+            Email verified successfully! You can now sign in.
+        </div>
+
         <form class="auth-form" action="/login" method="post">
             <div class="form-group">
                 <label for="username">Username</label>
@@ -33,6 +43,10 @@
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <div class="auth-forgot">
+                <a href="/forgotPassword">Forgot password?</a>
             </div>
 
             <button type="submit" class="auth-submit">Sign In</button>

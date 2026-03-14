@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,21 +52,6 @@ public class PageController {
         return "upload";
     }
 
-//    @GetMapping("/test-mail")
-//    public String testMail() throws Exception {
-//
-//        emailServices.sendMail(
-//                "swaraj1675 @gmail.com",
-//                "SkyLock Mail Test 🚀",
-//                "Mail working successfully!"
-//        );
-//
-//        return "redirect:/mail-success";
-//    }
-//    @GetMapping("/mail-success")
-//    public String mailSuccess() {
-//        return "test-mail";
-//    }
 
     @GetMapping("/validateEmail")
     public String validateEmailPage(){
@@ -80,6 +66,19 @@ public class PageController {
         return ResponseEntity.ok(Map.of(
                 "message", "Email verified successfully"
         ));
+    }
+
+    @GetMapping("/forgotPassword")
+    public String forgotPassword(){
+        return "forgot-password";
+    }
+
+    @GetMapping("/resetPassword")
+    public String showResetPage(@RequestParam String token, Model model) {
+
+        model.addAttribute("token", token);
+
+        return "resetPassword";
     }
     }
 

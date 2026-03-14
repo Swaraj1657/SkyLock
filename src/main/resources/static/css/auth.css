@@ -251,3 +251,42 @@ body::after {
         transform: translateX(6px);
     }
 }
+
+/* Success banner */
+.auth-success {
+    background: rgba(40, 167, 69, 0.2);
+    border: 1px solid rgba(40, 167, 69, 0.4);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #a3f5b8;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+/* Forgot-password link under the form */
+.auth-forgot {
+    text-align: right;
+    margin-top: -8px;
+}
+
+.auth-forgot a {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.65);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.auth-forgot a:hover {
+    color: var(--white);
+}
+
+/* Description text for auth pages */
+.auth-description {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}

@@ -1,26 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Email Verification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyLock — Verify Email</title>
+    <meta name="description" content="Verify your SkyLock email address.">
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
+
 <body>
 
-<h2>Email Verification</h2>
+    <div class="auth-card">
+        <div class="auth-brand">
+            <div class="auth-brand-icon">S</div>
+            <h1>SkyLock</h1>
+        </div>
 
-<p>Please verify your email to activate your account.</p>
+        <p class="auth-subtitle">Email Verification</p>
 
-<form action="/send-verification" method="post">
-    <button type="submit">Send Verification Link</button>
-</form>
+        <p class="auth-description">
+            Please verify your email to activate your account. Click the button below to receive a verification link.
+        </p>
 
-<br>
+        <form class="auth-form" action="/send-verification" method="post">
+            <button type="submit" class="auth-submit">Send Verification Link</button>
+        </form>
 
-<form action="/resend-verification" method="post">
-    <button type="submit">Resend Verification Link</button>
-</form>
+        <p class="auth-link" style="margin-top: 12px; font-size: 0.78rem; color: rgba(255,255,255,0.45);">
+            Resend available after 2 minutes.
+        </p>
 
-<p>Resend available after 2 minutes.</p>
+        <p class="auth-link">
+            <a href="/loginPage">Back to Sign In</a>
+        </p>
+    </div>
 
 </body>
+
 </html>
