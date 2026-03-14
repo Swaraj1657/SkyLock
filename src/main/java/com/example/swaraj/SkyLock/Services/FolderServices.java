@@ -1,5 +1,6 @@
 package com.example.swaraj.SkyLock.Services;
 
+import com.example.swaraj.SkyLock.Models.FileEntity;
 import com.example.swaraj.SkyLock.Models.Folder;
 import com.example.swaraj.SkyLock.Models.Users;
 import com.example.swaraj.SkyLock.Repo.FolderRepo;
@@ -7,6 +8,8 @@ import com.example.swaraj.SkyLock.Repo.UsersRepo;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -60,5 +63,42 @@ public class FolderServices {
         String parentId = folderRepo.findByName(parentName);
         List<Folder> folders = folderRepo.findFolderByIdAndUser(parentId, user.getId());
         return folders;
+    }
+
+    public void renameFolder(String id, String newname){
+        Users user = getCurrentUser();
+        Folder folder = folderRepo.findByIdIs(id);
+        if(folder == null){
+            throw new RuntimeException("Folder not found");
+        }
+        if(!folder.getOwner().getId().equals(user.getId())){
+            throw new RuntimeException("Unauthorized");
+        }
+        folder.setName(newname);
+        folderRepo.save(folder);
+    }
+
+    public List<Folder> getFolderTree(String parentId) {
+        Users user = getCurrentUser();
+        if (parentId != null && !parentId.isEmpty()) {
+            return folderRepo.findFolderByIdAndUser(parentId, user.getId());
+        } else {
+            return folderRepo.findByOwnerIdAndParentIsNull(user.getId());
+        }
+    }
+
+    public void moveFolder(String id, String parentId){
+        Users user = getCurrentUser();
+        Folder folder = folderRepo.findByIdIs(id);
+        Folder parent = folderRepo.findByIdIs(parentId);
+        if(folder == null){
+            throw new RuntimeException("Folder is not valid");
+        }
+        if(!folder.getOwner().getId().equals(user.getId())){
+            throw new RuntimeException("Unauthorized");
+        }
+
+        folder.setParent(parent);
+        folderRepo.save(folder);
     }
 }

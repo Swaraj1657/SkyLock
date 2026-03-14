@@ -25,5 +25,7 @@ public class SharedFile {
     @JoinColumn(name = "shared_with_user_id")
     private Users sharedwith;
 
+    private String role;
+
     private LocalDateTime sharedAt;
 }

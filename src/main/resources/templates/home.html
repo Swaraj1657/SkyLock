@@ -240,7 +240,7 @@
                 <!-- Actions -->
                 <div class="inspector-actions">
                     <button class="btn-download" id="btn-download">Download</button>
-                    <button class="btn-share">Share</button>
+                    <button class="btn-share" id="btn-share-inspector">Share</button>
                 </div>
             </div>
         </aside>
@@ -257,7 +257,7 @@
                     <polyline points="17 8 12 3 7 8" />
                     <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                <p>Drag & drop your file here, or <span>browse</span></p>
+                <p>Drag &amp; drop your file here, or <span>browse</span></p>
             </div>
             <input type="file" id="file-input" style="display: none;">
             <div class="selected-file-name" id="selected-file-name"></div>
@@ -294,6 +294,132 @@
         </div>
     </div>
 
+    <!-- ─── Share Modal (Google Drive Style) ─────────────── -->
+    <div class="modal-overlay" id="share-modal">
+        <div class="share-modal-content">
+            <div class="share-modal-header">
+                <h2>Share '<span id="share-modal-title">File</span>'</h2>
+                <div class="share-header-actions">
+                    <button class="share-icon-btn" title="Help">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </button>
+                    <button class="share-icon-btn" title="Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="share-email-row">
+                <input type="text" id="share-email-input"
+                       placeholder="Add people, groups, spaces and calendar events"
+                       autocomplete="off">
+                <button class="share-add-btn" id="share-add-btn" title="Add">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="share-section">
+                <div class="share-section-header">
+                    <h3>People with access</h3>
+                    <div class="share-section-icons">
+                        <button class="share-icon-btn small" title="Copy all">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                        <button class="share-icon-btn small" title="Notify">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="share-people-list" id="share-people-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="share-section share-general-access">
+                <h3>General access</h3>
+                <button class="general-access-row" id="general-access-toggle">
+                    <div class="general-access-icon" id="general-access-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+                    <div class="general-access-info">
+                        <span class="general-access-label" id="general-access-label">Restricted</span>
+                        <span class="general-access-desc" id="general-access-desc">Only people with access can open with the link</span>
+                    </div>
+                    <svg class="general-access-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="share-modal-footer">
+                <button class="share-copy-link-btn" id="share-copy-link-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                    Copy link
+                </button>
+                <button class="share-done-btn" id="share-done-btn">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Rename Modal ──────────────────────────────────── -->
+    <div class="modal-overlay" id="rename-modal">
+        <div class="modal-content">
+            <h2 id="rename-modal-title">Rename</h2>
+            <div class="folder-name-input">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                <input type="text" id="rename-input" placeholder="Enter new name..." autocomplete="off">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="rename-cancel-btn">Cancel</button>
+                <button class="btn-upload-confirm" id="rename-confirm-btn">Rename</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Move Modal (Organize) ─────────────────────────── -->
+    <div class="modal-overlay" id="move-modal">
+        <div class="move-modal-content">
+            <div class="move-modal-header">
+                <h2>Move "<span id="move-modal-item-name">Item</span>"</h2>
+            </div>
+            <div class="move-breadcrumbs" id="move-breadcrumbs">
+                <a href="javascript:void(0)" class="move-breadcrumb-link">My Files</a>
+            </div>
+            <div class="move-folder-list" id="move-folder-list">
+                <!-- Populated by JS -->
+            </div>
+            <div class="move-modal-footer">
+                <button class="btn-cancel" id="move-cancel-btn">Cancel</button>
+                <button class="btn-upload-confirm" id="move-confirm-btn">Move here</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
@@ -306,6 +432,9 @@
     <script src="/js/user-menu.js"></script>
     <script src="/js/upload.js"></script>
     <script src="/js/folder-modal.js"></script>
+    <script src="/js/share-modal.js"></script>
+    <script src="/js/rename-modal.js"></script>
+    <script src="/js/move-modal.js"></script>
     <script src="/js/app.js"></script>
 </body>
 

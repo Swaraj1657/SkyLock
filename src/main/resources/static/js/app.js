@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     skylock.bindSidebarNav();
     skylock.bindUploadModal();
     skylock.bindFolderModal();
+    skylock.bindShareModal();
+    skylock.bindRenameModal();
+    skylock.bindMoveModal();
     skylock.bindUserMenu();
     skylock.bindStorageRing();
 });

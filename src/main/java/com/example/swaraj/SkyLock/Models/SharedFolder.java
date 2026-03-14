@@ -7,6 +7,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SharedFolder {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -19,6 +24,8 @@ public class SharedFolder {
     @ManyToOne
     @JoinColumn(name = "shared_with_user_id")
     private Users sharedWith;
+
+    private String role;
 
     private LocalDateTime sharedAt;
 

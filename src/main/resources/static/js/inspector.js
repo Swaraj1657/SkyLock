@@ -35,6 +35,14 @@
             window.location.href = '/api/files/download/' + file.id;
         };
 
+        // Share button
+        const shareBtn = document.getElementById('btn-share-inspector');
+        if (shareBtn) {
+            shareBtn.onclick = () => {
+                skylock.openShareModal('file', file.id, file.filename);
+            };
+        }
+
         // Tags
         const tagRow = document.getElementById('inspector-tags');
         tagRow.innerHTML = '';

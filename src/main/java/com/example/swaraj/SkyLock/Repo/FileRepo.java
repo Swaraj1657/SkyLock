@@ -11,16 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface FileRepo extends JpaRepository<FileEntity, String> {
-
-    @Query("""
-                    SELECT f
-                    FROM FileEntity f
-                    WHERE f.folder.id = :parentId
-                    AND f.owner.id = :userId
-            """)
-    List<FileEntity> findFilesByIdAndUser(
-            @Param("parentId") String parentId,
-            @Param("userId") String userId);
+    
 
     List<FileEntity> findByOwnerIdAndFolderIsNull(String ownerId);
 
@@ -29,4 +20,8 @@ public interface FileRepo extends JpaRepository<FileEntity, String> {
     List<FileEntity> findByFolderIdAndOwnerId(String folderId, String ownerId);
 
     Optional<FileEntity> findById(String fileId);
+
+    FileEntity findByIdIs(String id);
+
+    FileEntity findByFilenameAndOwnerId(String filename, String ownerId);
 }

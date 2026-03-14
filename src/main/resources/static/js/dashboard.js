@@ -66,9 +66,39 @@
         card.style.animationDelay = `${index * 0.06}s`;
         card.dataset.folderId = folder.id;
 
+        const escapedName = skylock.escapeHtml(folder.name).replace(/'/g, "\\'");
+
         card.innerHTML = `
             <div class="card-thumb">
                 <span class="folder-icon">📁</span>
+                <div class="card-actions">
+                    <button class="card-action-btn rename" title="Rename" onclick="event.stopPropagation(); skylock.openRenameModal('folder', '${folder.id}', '${escapedName}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <button class="card-action-btn share" title="Share" onclick="event.stopPropagation(); skylock.openShareModal('folder', '${folder.id}', '${escapedName}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                    </button>
+                    <button class="card-action-btn move" title="Move" onclick="event.stopPropagation(); skylock.openMoveModal('folder', '${folder.id}', '${escapedName}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            <polyline points="12 11 12 17"/>
+                            <polyline points="9 14 12 11 15 14"/>
+                        </svg>
+                    </button>
+                    <button class="card-action-btn delete" title="Delete" onclick="event.stopPropagation(); skylock.deleteFolder('${folder.id}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="card-info">
                 <h3>${skylock.escapeHtml(folder.name)}</h3>
@@ -95,21 +125,30 @@
 
         const thumbContent = getThumbContent(file);
 
+        const escapedFilename = skylock.escapeHtml(file.filename).replace(/'/g, "\\'");
+
         card.innerHTML = `
             <div class="card-thumb">
                 ${thumbContent}
                 <div class="card-actions">
-                    <button class="card-action-btn edit" title="Edit" onclick="event.stopPropagation()">
+                    <button class="card-action-btn rename" title="Rename" onclick="event.stopPropagation(); skylock.openRenameModal('file', '${file.id}', '${escapedFilename}')">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                     </button>
-                    <button class="card-action-btn share" title="Share" onclick="event.stopPropagation()">
+                    <button class="card-action-btn share" title="Share" onclick="event.stopPropagation(); skylock.openShareModal('file', '${file.id}', '${escapedFilename}')">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
                             <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
                             <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                    </button>
+                    <button class="card-action-btn move" title="Move" onclick="event.stopPropagation(); skylock.openMoveModal('file', '${file.id}', '${escapedFilename}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            <polyline points="12 11 12 17"/>
+                            <polyline points="9 14 12 11 15 14"/>
                         </svg>
                     </button>
                     <button class="card-action-btn delete" title="Delete" data-file-id="${file.id}" onclick="event.stopPropagation(); skylock.deleteFile('${file.id}')">
@@ -162,6 +201,19 @@
             await skylock.apiFetch('/api/files/' + fileId, { method: 'DELETE' });
             skylock.showToast('File deleted successfully', 'success');
             if (skylock.state.selectedFileId === fileId) skylock.closeInspector();
+            skylock.loadDashboard();
+        } catch (e) {
+            // Error already shown by apiFetch
+        }
+    };
+
+    // ── Delete Folder ────────────────────────────────
+    skylock.deleteFolder = async function (folderId) {
+        if (!confirm('Are you sure you want to delete this folder and all its contents?')) return;
+
+        try {
+            await skylock.apiFetch('/api/folders/' + folderId, { method: 'DELETE' });
+            skylock.showToast('Folder deleted successfully', 'success');
             skylock.loadDashboard();
         } catch (e) {
             // Error already shown by apiFetch

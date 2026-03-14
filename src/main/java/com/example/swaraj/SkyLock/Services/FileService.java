@@ -123,4 +123,31 @@ public class FileService {
 
         return resource;
     }
+
+    public void renameFile(String id, String newname){
+        Users user = getCurrentUser();
+        FileEntity file = fileRepo.findByIdIs(id);
+        if(file == null){
+            throw new RuntimeException("File not found");
+        }
+        if(!file.getOwner().getId().equals(user.getId())){
+            throw new RuntimeException("Unauthorized");
+        }
+        file.setFilename(newname);
+        fileRepo.save(file);
+    }
+
+    public void moveFile(String id, String folderId){
+        Users user = getCurrentUser();
+        FileEntity file = fileRepo.findByIdIs(id);
+        Folder folder = folderRepo.findByIdIs(folderId);
+        if(file == null){
+            throw new RuntimeException("File not found");
+        }
+        if(!file.getOwner().getId().equals(user.getId())){
+            throw new RuntimeException("Unauthorized");
+        }
+        file.setFolder(folder);
+        fileRepo.save(file);
+    }
 }
