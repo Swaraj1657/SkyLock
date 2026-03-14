@@ -1,0 +1,32 @@
+[33m6b4f3b8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: reset: moving to 6b4f3b8
+[33m6b4f3b8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: rebase (finish): returning to refs/heads/main
+[33m6b4f3b8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{2}: rebase (start): checkout 6b4f3b8
+[33m0054f3b[m HEAD@{3}: rebase (abort): returning to refs/heads/main
+[33m6b4f3b8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{4}: rebase (start): checkout 6b4f3b8
+[33m0054f3b[m HEAD@{5}: reset: moving to 0054f3b
+[33m0054f3b[m HEAD@{6}: rebase (abort): returning to refs/heads/main
+[33m0ce8a27[m HEAD@{7}: rebase (start): checkout 0ce8a27e8e4827e967c1bc25c5f87fea5dda61fa
+[33m0054f3b[m HEAD@{8}: commit: Initial commit without secrets
+[33m0b88c70[m HEAD@{9}: reset: moving to HEAD~1
+[33m662f0ee[m HEAD@{10}: reset: moving to HEAD~1
+[33m705f194[m HEAD@{11}: commit: Email verification
+[33m662f0ee[m HEAD@{12}: commit: Removed application.properties from git tracking
+[33m0b88c70[m HEAD@{13}: commit: Email Verification
+[33m6b4f3b8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{14}: commit (amend): pushed on skylock.dpdns.org domain
+[33m0af339a[m HEAD@{15}: reset: moving to 0af339a
+[33mef91d71[m HEAD@{16}: reset: moving to ef91d71
+[33ma701454[m HEAD@{17}: commit: Removed secrets
+[33meadf157[m HEAD@{18}: commit: pushed on skyLock.dpdns.org domain
+[33m0af339a[m HEAD@{19}: commit: pushed on skylock.dpdns.org domain
+[33mef91d71[m HEAD@{20}: commit: service code is update
+[33m42bb661[m HEAD@{21}: commit: frontend changes
+[33mfe8d1cb[m HEAD@{22}: commit: Files uploading in Chunks/Frontend is seprated Properly
+[33m9fb98c4[m HEAD@{23}: reset: moving to origin/main
+[33me420484[m HEAD@{24}: commit: create folder logic is tested
+[33m71df3db[m HEAD@{25}: commit: create a folder & view Folder logic is added / not tested
+[33me433149[m HEAD@{26}: commit: File management issues are solve
+[33mf180e36[m HEAD@{27}: commit: Storage Path is added & File,Folder Db is created
+[33m9d332ed[m HEAD@{28}: commit: auth is completed
+[33m7b206a8[m HEAD@{29}: commit: jwt and logout logic is added
+[33m92aaf00[m HEAD@{30}: pull origin main: Fast-forward
+[33m410bf20[m HEAD@{31}: commit (initial): Initial commit

@@ -24,9 +24,20 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(customize -> customize.disable());
         httpSecurity.authorizeHttpRequests(request -> request
-                .requestMatchers("/","/register", "/login", "/registerPage", "/loginPage", "/css/**", "/js/**",
-                        "/images/**", "/logout")
-                .permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/register",
+                                "/login",
+                                "/registerPage",
+                                "/loginPage",
+                                "/validateEmail",
+                                "/verify-email",
+                                "/send-verification",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/logout"
+                        ).permitAll()
                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFillter, UsernamePasswordAuthenticationFilter.class)

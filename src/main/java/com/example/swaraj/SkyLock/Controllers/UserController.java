@@ -41,19 +41,31 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(@ModelAttribute Users user, HttpServletResponse response, HttpServletRequest request) {
+    public String login(@ModelAttribute Users user,
+                         HttpServletResponse response,
+                         HttpServletRequest request) {
+
+        System.out.println(user);
 
         String token;
+
         try {
-            token = service.verify(user);
+            token = service.verify(user);   // authenticate first
         } catch (Exception e) {
             return "redirect:/loginPage?error";
+        }
+
+        if(!service.isEmailIsVerified(user)){
+            System.out.println(user.getUsername());
+            request.getSession().setAttribute("User", user.getUsername());
+            return "redirect:/validateEmail";
         }
 
         Cookie cookie = new Cookie("jwt", token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(60 * 60);
+
         response.addCookie(cookie);
 
         return "redirect:/home";
@@ -71,14 +83,14 @@ public class UserController {
         return "redirect:/loginPage";
     }
 
-    @GetMapping("/users")
-    public String showUsers(Model model) {
-
-        List<Users> users = service.findAllUser();
-        model.addAttribute("users", users);
-
-        return "users";
-    }
+//    @GetMapping("/users")
+//    public String showUsers(Model model) {
+//
+//        List<Users> users = service.findAllUser();
+//        model.addAttribute("users", users);
+//
+//        return "users";
+//    }
 
     @GetMapping("/home")
     public String home(Model model){

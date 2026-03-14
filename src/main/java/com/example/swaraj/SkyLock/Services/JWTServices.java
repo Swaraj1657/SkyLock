@@ -65,4 +65,14 @@ public class JWTServices {
         }
         return null;
     }
+
+    public String genrateValidationToken(String user){
+        return Jwts.builder()
+                .subject(user)
+                .claim("type","email-verification")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000*60*10))
+                .signWith(key)
+                .compact();
+    }
 }

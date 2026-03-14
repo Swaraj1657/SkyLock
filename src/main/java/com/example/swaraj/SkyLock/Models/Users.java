@@ -41,6 +41,8 @@ public class Users {
 
     private boolean enabled = true;
 
+    private boolean isEmailVerified = false;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -68,5 +70,9 @@ public class Users {
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
+    }
+
+    public Users orElseThrow() {
+        return null;
     }
 }

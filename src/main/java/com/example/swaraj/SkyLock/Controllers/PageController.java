@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Controller
 public class PageController {
@@ -50,19 +51,35 @@ public class PageController {
         return "upload";
     }
 
-    @GetMapping("/test-mail")
-    public String testMail() throws Exception {
+//    @GetMapping("/test-mail")
+//    public String testMail() throws Exception {
+//
+//        emailServices.sendMail(
+//                "swaraj1675 @gmail.com",
+//                "SkyLock Mail Test 🚀",
+//                "Mail working successfully!"
+//        );
+//
+//        return "redirect:/mail-success";
+//    }
+//    @GetMapping("/mail-success")
+//    public String mailSuccess() {
+//        return "test-mail";
+//    }
 
-        emailServices.sendMail(
-                "swarajpendhare1125@gmail.com",
-                "SkyLock Mail Test 🚀",
-                "Mail working successfully!"
-        );
+    @GetMapping("/validateEmail")
+    public String validateEmailPage(){
+        return "validateEmail";
+    }
 
-        return "redirect:/mail-success";
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+
+        emailServices.verifyEmail(token);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Email verified successfully"
+        ));
     }
-    @GetMapping("/mail-success")
-    public String mailSuccess() {
-        return "test-mail";
     }
-}
+

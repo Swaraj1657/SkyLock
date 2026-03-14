@@ -34,6 +34,18 @@ public class UserService {
         this.jwtServices = jwtServices;
     }
 
+    public Users findByUsername(String username){
+        return repo.findByUsername(username);
+    }
+
+    public Users findById(String id){
+        return repo.findById(id);
+    }
+
+    public void save(Users users){
+        repo.save(users);
+    }
+
     public Users registers(Users user) {
         if (repo.findByUsername(user.getUsername()) != null) {
             throw new RuntimeException("Username already exists");
@@ -54,14 +66,17 @@ public class UserService {
         }
     }
 
-//    public boolean isAlreadyLogin(){
-//
-//    }
+    public boolean isEmailIsVerified(Users user){
 
-    public List<Users> findAllUser() {
-        return repo.findAll();
+        Users dbUser = repo.findByUsername(user.getUsername());
+
+        if(dbUser == null){
+            return false;
+        }
+
+        return dbUser.isEmailVerified();
     }
 
-    //
+
 
 }

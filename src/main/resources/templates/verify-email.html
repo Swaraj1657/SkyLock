@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Verification</title>
+</head>
+
+<body>
+
+<h2>Verifying your email...</h2>
+
+<script>
+
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    fetch("/api/auth/verify-email?token=" + token)
+        .then(res => res.json())
+        .then(data => {
+            document.body.innerHTML = "<h2>" + data.message + "</h2>";
+        });
+
+</script>
+
+</body>
+</html>
