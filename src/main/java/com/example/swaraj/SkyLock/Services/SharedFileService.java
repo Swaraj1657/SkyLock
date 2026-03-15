@@ -6,11 +6,13 @@ import com.example.swaraj.SkyLock.Models.Users;
 import com.example.swaraj.SkyLock.Repo.FileRepo;
 import com.example.swaraj.SkyLock.Repo.SharedFileRepo;
 import com.example.swaraj.SkyLock.Repo.UsersRepo;
+import jakarta.mail.MessagingException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,14 +23,16 @@ import java.util.Optional;
 @Service
 public class SharedFileService {
 
+    private final EmailServices emailServices;
     private UsersRepo usersRepo;
     private FileRepo fileRepo;
     private SharedFileRepo sharedFileRepo;
 
-    public SharedFileService(UsersRepo usersRepo, FileRepo fileRepo, SharedFileRepo sharedFileRepo) {
+    public SharedFileService(UsersRepo usersRepo, FileRepo fileRepo, SharedFileRepo sharedFileRepo, EmailServices emailServices) {
         this.usersRepo = usersRepo;
         this.fileRepo = fileRepo;
         this.sharedFileRepo = sharedFileRepo;
+        this.emailServices = emailServices;
     }
 
     public Users getCurrentUser(){
@@ -40,9 +44,9 @@ public class SharedFileService {
     }
 
     @Transactional
-    public String giveAccess(String fileId,String usernameOrEmail, String role){
+    public String giveAccess(String fileId,String usernameOrEmail, String role) throws MessagingException, IOException {
         Users user = getCurrentUser();
-        // usernameOrEmail = other than owner
+        String descrption = "File is sended with you";
         Users sharedUser = usersRepo.findByUsernameOrEmail(usernameOrEmail,usernameOrEmail);
 
         if (sharedUser == null)
@@ -71,6 +75,11 @@ public class SharedFileService {
         sharedFile.setSharedAt(LocalDateTime.now());
 
         sharedFileRepo.save(sharedFile);
+        
+        String fileLink = "http://skylock.dpdns.org/home?view=shared&fileId=" + file.getId();
+
+        emailServices.sharedFileEmail(user.getUsername(), user.getEmail(), descrption, sharedUser.getEmail(), file.getFilename(), fileLink);
+
         return "File is shared to user";
     }
 

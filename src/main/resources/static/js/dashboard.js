@@ -34,12 +34,27 @@
     };
 
     // ── Load Shared Items ────────────────────────────
-    skylock.loadSharedItems = async function () {
+    skylock.loadSharedItems = async function (fileIdToSelect = null) {
         try {
             const data = await skylock.apiFetch('/api/shared/with-me');
             renderSharedGrid(data.sharedFiles || [], data.sharedFolders || []);
             skylock.updateBreadcrumbs();
             skylock.updateContentHeader();
+
+            if (fileIdToSelect) {
+                // Wait a bit for animations to settle
+                setTimeout(() => {
+                    const card = document.querySelector(`.asset-card[data-file-id="${fileIdToSelect}"]`);
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Simulate click to select and open inspector
+                        const file = (data.sharedFiles || []).find(f => f.id === fileIdToSelect);
+                        if (file) {
+                            skylock.selectFile(file, card);
+                        }
+                    }
+                }, 500);
+            }
         } catch (e) {
             renderEmptyState('Failed to load shared items.');
         }

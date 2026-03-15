@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>File Shared</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; background-color:#f5f5f5; padding:20px;">
+
+<table align="center" width="600" style="background:white; border-radius:8px; padding:30px;">
+    <tr>
+        <td>
+
+            <h2 style="color:#202124;">{{ownerName}} shared a file with you</h2>
+
+            <p style="color:#444;">
+                <strong>{{ownerName}}</strong> ({{ownerEmail}}) has invited you to view the following file.
+            </p>
+
+            <br>
+
+            <p style="color:#444;">
+                {{message}}
+            </p>
+
+            <br><br>
+
+            <!-- FILE BOX -->
+            <table align="center" style="border:1px solid #ddd; border-radius:8px; padding:12px 20px;">
+                <tr>
+                    <td style="font-size:16px; text-align:center;">
+                        📄 <strong>{{fileName}}</strong>
+                    </td>
+                </tr>
+            </table>
+
+            <br><br>
+
+            <!-- OPEN BUTTON -->
+            <div style="text-align:center;">
+                <a href="{{fileLink}}"
+                   style="
+background:#1a73e8;
+color:white;
+padding:12px 28px;
+text-decoration:none;
+border-radius:6px;
+font-weight:bold;
+display:inline-block;">
+                    Open File
+                </a>
+            </div>
+
+            <br><br><br>
+
+            <hr>
+
+            <p style="font-size:12px; color:#777; text-align:center;">
+                You received this email because a file was shared with you on SkyLock.
+            </p>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

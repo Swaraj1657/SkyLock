@@ -3,9 +3,11 @@ package com.example.swaraj.SkyLock.Controllers;
 import com.example.swaraj.SkyLock.DTO.ShareRequest;
 import com.example.swaraj.SkyLock.Services.SharedFileService;
 import com.example.swaraj.SkyLock.Services.SharedFolderServices;
+import jakarta.mail.MessagingException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -21,7 +23,7 @@ public class SharedFileController {
     }
 
     @PostMapping("/share/file/{id}")
-    public ResponseEntity<?> shareFile(@PathVariable String id, @RequestBody ShareRequest request){
+    public ResponseEntity<?> shareFile(@PathVariable String id, @RequestBody ShareRequest request) throws MessagingException, IOException {
         try {
             sharedFileService.giveAccess(id, request.getEmail(), request.getRole());
             return ResponseEntity.ok(Map.of("message", "Access is given"));

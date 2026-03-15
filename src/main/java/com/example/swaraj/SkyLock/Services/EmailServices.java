@@ -102,4 +102,21 @@ public class EmailServices {
         mailSender.send(message);
     }
 
+
+    public void sharedFileEmail(String ownerName,String ownerEmail, String descrption ,String sharedEmail, String fileName, String fileLink) throws MessagingException, IOException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper =  new MimeMessageHelper(message, true , "UTF-8");
+        helper.setFrom("SkyLockSharedFiles<sharedfiles@skylock.dpdns.org>");
+        helper.setTo(sharedEmail);
+        helper.setSubject(ownerName + " shared a file with you - SkyLock");
+        String body = loadTemplate("/templates/emails/sharedfileemail.html");
+        body = body.replace("{{ownerName}}", ownerName);
+        body = body.replace("{{ownerEmail}}", ownerEmail);
+        body = body.replace("{{fileName}}", fileName);
+        body = body.replace("{{fileLink}}", fileLink);
+        body = body.replace("{{message}}", descrption);
+        helper.setText(body, true);
+
+        mailSender.send(message);
+    }
 }
