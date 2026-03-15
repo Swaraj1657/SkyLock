@@ -17,6 +17,10 @@ skylock.showToast = function (msg, type) {
 skylock.apiFetch = async function (url, options = {}) {
     try {
         const res = await fetch(url, options);
+        if (res.status === 401 || res.status === 403) {
+            window.location.href = '/loginPage';
+            return;
+        }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
     } catch (e) {

@@ -78,4 +78,17 @@ public class FolderController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    @DeleteMapping("/folders/{id}")
+    public ResponseEntity<?> deleteFolder(@PathVariable String id) {
+        try {
+            folderServices.deleteFolder(id);
+            return ResponseEntity.ok(Map.of("message", "Folder deleted successfully"));
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("Unauthorized")) {
+                return ResponseEntity.status(403).body(Map.of("error", "Unauthorized"));
+            }
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

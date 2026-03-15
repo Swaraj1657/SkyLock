@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -36,7 +40,7 @@ public class SharedFileService {
     }
 
     @Transactional
-    public String giveAccess(String fileId,String usernameOrEmail){
+    public String giveAccess(String fileId,String usernameOrEmail, String role){
         Users user = getCurrentUser();
         // usernameOrEmail = other than owner
         Users sharedUser = usersRepo.findByUsernameOrEmail(usernameOrEmail,usernameOrEmail);
@@ -61,11 +65,33 @@ public class SharedFileService {
             throw new RuntimeException("File is already Shared");
 
         SharedFile sharedFile = new SharedFile();
-            sharedFile.setFile(file);
-            sharedFile.setSharedwith(sharedUser);
-            sharedFile.setSharedAt(LocalDateTime.now());
+        sharedFile.setFile(file);
+        sharedFile.setSharedwith(sharedUser);
+        sharedFile.setRole(role != null ? role : "viewer");
+        sharedFile.setSharedAt(LocalDateTime.now());
 
         sharedFileRepo.save(sharedFile);
         return "File is shared to user";
+    }
+
+    public List<Map<String, Object>> getSharedWithMe() {
+        Users user = getCurrentUser();
+
+        List<SharedFile> sharedFilesList = sharedFileRepo.findBySharedwith(user);
+
+        List<Map<String, Object>> fileList = new ArrayList<>();
+        for (SharedFile sf : sharedFilesList) {
+            Map<String, Object> fm = new HashMap<>();
+            fm.put("id", sf.getFile().getId()); 
+            fm.put("filename", sf.getFile().getFilename());
+            fm.put("size", sf.getFile().getSize());
+            fm.put("uploadedAt", sf.getFile().getUploadedAt() != null ? sf.getFile().getUploadedAt().toString() : ""); 
+            fm.put("ownerName", sf.getFile().getOwner().getUsername());
+            fm.put("role", sf.getRole());
+            fm.put("sharedAt", sf.getSharedAt() != null ? sf.getSharedAt().toString() : "");
+            fileList.add(fm);
+        }
+
+        return fileList;
     }
 }

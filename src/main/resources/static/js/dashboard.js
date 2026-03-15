@@ -10,7 +10,8 @@
         selectedFileId: null,
         currentFolderId: null,
         dashboardData: null,
-        folderStack: []   // [{id, name}, ...] for breadcrumbs
+        folderStack: [],   // [{id, name}, ...] for breadcrumbs
+        viewMode: 'home'   // 'home' or 'shared'
     };
 
     const assetGrid = document.getElementById('asset-grid');
@@ -31,6 +32,95 @@
             renderEmptyState('Failed to load files.');
         }
     };
+
+    // ── Load Shared Items ────────────────────────────
+    skylock.loadSharedItems = async function () {
+        try {
+            const data = await skylock.apiFetch('/api/shared/with-me');
+            renderSharedGrid(data.sharedFiles || [], data.sharedFolders || []);
+            skylock.updateBreadcrumbs();
+            skylock.updateContentHeader();
+        } catch (e) {
+            renderEmptyState('Failed to load shared items.');
+        }
+    };
+
+    // ── Render Shared Grid ───────────────────────────
+    function renderSharedGrid(files, folders) {
+        assetGrid.innerHTML = '';
+
+        if (files.length === 0 && folders.length === 0) {
+            renderEmptyState('Nothing has been shared with you yet.');
+            return;
+        }
+
+        let index = 0;
+        folders.forEach(folder => {
+            const card = createSharedFolderCard(folder, index++);
+            assetGrid.appendChild(card);
+        });
+
+        files.forEach(file => {
+            const card = createSharedFileCard(file, index++);
+            assetGrid.appendChild(card);
+        });
+    }
+
+    function createSharedFolderCard(item, index) {
+        const card = document.createElement('div');
+        card.className = 'asset-card shared';
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.dataset.folderId = item.id;
+
+        card.innerHTML = `
+            <div class="card-thumb">
+                <span class="folder-icon">📁</span>
+                <span class="shared-badge">Shared</span>
+            </div>
+            <div class="card-info">
+                <h3>${skylock.escapeHtml(item.name)}</h3>
+                <span class="card-meta">Shared by: ${skylock.escapeHtml(item.ownerName)}</span>
+            </div>
+        `;
+
+        card.addEventListener('click', () => {
+            skylock.state.viewMode = 'home'; 
+            skylock.state.folderStack.push({ id: item.id, name: item.name });
+            skylock.state.currentFolderId = item.id;
+            skylock.loadDashboard();
+        });
+
+        return card;
+    }
+
+    function createSharedFileCard(item, index) {
+        const card = document.createElement('div');
+        card.className = 'asset-card shared';
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.dataset.fileId = item.id;
+
+        card.innerHTML = `
+            <div class="card-thumb">
+                ${getThumbContent(item)}
+                <span class="shared-badge">Shared</span>
+                <div class="card-actions">
+                    <button class="card-action-btn download" title="Download" onclick="event.stopPropagation(); window.location.href='/api/files/download/${item.id}'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="card-info">
+                <h3>${skylock.escapeHtml(item.filename)}</h3>
+                <span class="card-meta">Shared by: ${skylock.escapeHtml(item.ownerName)}</span>
+            </div>
+        `;
+
+        card.addEventListener('click', () => skylock.selectFile(item, card));
+
+        return card;
+    }
 
     // ── Render Grid ──────────────────────────────────
     function renderGrid(files, folders) {
@@ -63,7 +153,7 @@
     function createFolderCard(folder, index) {
         const card = document.createElement('div');
         card.className = 'asset-card';
-        card.style.animationDelay = `${index * 0.06}s`;
+        card.style.animationDelay = `${index * 0.05}s`;
         card.dataset.folderId = folder.id;
 
         const escapedName = skylock.escapeHtml(folder.name).replace(/'/g, "\\'");
@@ -102,15 +192,13 @@
             </div>
             <div class="card-info">
                 <h3>${skylock.escapeHtml(folder.name)}</h3>
-                <span class="card-meta">${folder.itemCount || 0} items · Folder</span>
+                <span class="card-meta">${folder.itemCount || 0} items</span>
             </div>
         `;
 
         card.addEventListener('click', () => {
             skylock.state.folderStack.push({ id: folder.id, name: folder.name });
             skylock.state.currentFolderId = folder.id;
-            skylock.state.selectedFileId = null;
-            skylock.closeInspector();
             skylock.loadDashboard();
         });
 
@@ -120,17 +208,21 @@
     function createFileCard(file, index) {
         const card = document.createElement('div');
         card.className = 'asset-card';
-        card.style.animationDelay = `${index * 0.06}s`;
+        card.style.animationDelay = `${index * 0.05}s`;
         card.dataset.fileId = file.id;
 
         const thumbContent = getThumbContent(file);
-
         const escapedFilename = skylock.escapeHtml(file.filename).replace(/'/g, "\\'");
 
         card.innerHTML = `
             <div class="card-thumb">
                 ${thumbContent}
                 <div class="card-actions">
+                    <button class="card-action-btn download" title="Download" onclick="event.stopPropagation(); window.location.href='/api/files/download/${file.id}'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                    </button>
                     <button class="card-action-btn rename" title="Rename" onclick="event.stopPropagation(); skylock.openRenameModal('file', '${file.id}', '${escapedFilename}')">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>

@@ -43,7 +43,29 @@ public class SecurityConfig {
                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFillter, UsernamePasswordAuthenticationFilter.class)
-                .logout(customize -> customize.disable());
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            String uri = request.getRequestURI();
+                            if (uri.startsWith("/api/")) {
+                                // API calls get 401 JSON
+                                response.setStatus(401);
+                                response.setContentType("application/json");
+                                response.getWriter().write("{\"error\":\"Unauthorized\"}");
+                            } else {
+                                // Page requests redirect to login
+                                response.sendRedirect("/loginPage");
+                            }
+                        })
+                )
+                .logout(customize -> customize.disable())
+                .headers(headers -> headers
+                        .cacheControl(cache -> cache.disable())
+                        .addHeaderWriter((request, response) -> {
+                            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+                            response.setHeader("Pragma", "no-cache");
+                            response.setHeader("Expires", "0");
+                        })
+                );
 
         return httpSecurity.build();
     }

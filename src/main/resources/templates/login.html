@@ -57,6 +57,14 @@
         </p>
     </div>
 
+    <script>
+        // Prevent back button from going to protected pages after logout
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.pushState(null, null, location.href);
+        };
+    </script>
+
 </body>
 
 </html>

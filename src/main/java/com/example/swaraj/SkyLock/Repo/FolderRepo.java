@@ -29,5 +29,5 @@ public interface FolderRepo extends JpaRepository<Folder, String> {
 
     List<Folder> findByOwnerId(String ownerId);
 
-    Folder findFolderByNameAndOwnerId(String name, String ownerId);
+    List<Folder> findFolderByIdAndOwnerId(String id, String ownerId);
 }

@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 @Service
@@ -61,7 +64,7 @@ public class FolderServices {
     public List<Folder> viewFolder(String parentName) {
         Users user = getCurrentUser();
         String parentId = folderRepo.findByName(parentName);
-        List<Folder> folders = folderRepo.findFolderByIdAndUser(parentId, user.getId());
+        List<Folder> folders = folderRepo.findFolderByIdAndOwnerId(parentId, user.getId());
         return folders;
     }
 
@@ -81,7 +84,7 @@ public class FolderServices {
     public List<Folder> getFolderTree(String parentId) {
         Users user = getCurrentUser();
         if (parentId != null && !parentId.isEmpty()) {
-            return folderRepo.findFolderByIdAndUser(parentId, user.getId());
+            return folderRepo.findFolderByIdAndOwnerId(parentId, user.getId());
         } else {
             return folderRepo.findByOwnerIdAndParentIsNull(user.getId());
         }
@@ -100,5 +103,45 @@ public class FolderServices {
 
         folder.setParent(parent);
         folderRepo.save(folder);
+    }
+
+    @Transactional
+    public void deleteFolder(String folderId) {
+        Users user = getCurrentUser();
+        Folder folder = folderRepo.findByIdIs(folderId);
+
+        if (folder == null) {
+            throw new RuntimeException("Folder not found");
+        }
+        if (!folder.getOwner().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        recursiveDelete(folder, user);
+        folderRepo.delete(folder);
+    }
+
+    private void recursiveDelete(Folder folder, Users user) {
+        // Delete subfolders recursively
+        if (folder.getSubFolders() != null) {
+            for (Folder subFolder : folder.getSubFolders()) {
+                recursiveDelete(subFolder, user);
+            }
+        }
+
+        // Delete files in this folder
+        if (folder.getFiles() != null) {
+            for (FileEntity file : folder.getFiles()) {
+                try {
+                    Path filePath = Path.of(file.getPath());
+                    Files.deleteIfExists(filePath);
+                } catch (IOException e) {
+                    // Log error but continue deleting other things
+                    System.err.println("Could not delete physical file: " + file.getPath());
+                }
+                user.setUsedStorage(user.getUsedStorage() - file.getSize());
+            }
+        }
+        usersRepo.save(user);
     }
 }

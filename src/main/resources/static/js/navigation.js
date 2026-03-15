@@ -14,10 +14,19 @@
                 this.classList.add('active');
 
                 if (this.dataset.nav === 'home' || this.dataset.nav === 'projects') {
+                    skylock.state.viewMode = 'home';
                     skylock.state.folderStack = [];
                     skylock.state.currentFolderId = null;
                     skylock.closeInspector();
                     skylock.loadDashboard();
+                } else if (this.dataset.nav === 'shared') {
+                    skylock.state.viewMode = 'shared';
+                    skylock.state.folderStack = [];
+                    skylock.state.currentFolderId = null;
+                    skylock.closeInspector();
+                    if (typeof skylock.loadSharedItems === 'function') {
+                        skylock.loadSharedItems();
+                    }
                 }
             });
         });
@@ -30,7 +39,10 @@
 
         let html = `<a href="javascript:void(0)" onclick="skylock.goToRoot()">Home</a>`;
 
-        if (skylock.state.folderStack.length > 0) {
+        if (skylock.state.viewMode === 'shared') {
+            html += `<span class="sep">/</span>`;
+            html += `<span class="current">Shared with Me</span>`;
+        } else if (skylock.state.folderStack.length > 0) {
             html += `<span class="sep">/</span>`;
             html += `<a href="javascript:void(0)" onclick="skylock.goToRoot()">My Files</a>`;
 
@@ -54,7 +66,9 @@
         const header = document.querySelector('.content-header h1');
         if (!header) return;
 
-        if (skylock.state.folderStack.length > 0) {
+        if (skylock.state.viewMode === 'shared') {
+            header.textContent = 'Shared with Me';
+        } else if (skylock.state.folderStack.length > 0) {
             header.textContent = skylock.state.folderStack[skylock.state.folderStack.length - 1].name;
         } else {
             header.textContent = 'My Files';
