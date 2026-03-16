@@ -258,7 +258,6 @@ The application will be available at `http://localhost:8080`.
 - GitHub: [@Swaraj1657](https://github.com/Swaraj1657)
 - Live: [skylock.dpdns.org](https://skylock.dpdns.org)
 - contact : swaraj1675@gmail.com
-- 
 ---
 
 *Built with Spring Boot, secured with JWT, deployed on Cloudflare.*
