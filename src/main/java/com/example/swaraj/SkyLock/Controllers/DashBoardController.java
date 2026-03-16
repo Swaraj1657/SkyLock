@@ -112,4 +112,48 @@ public class DashBoardController {
                     .body(e.getMessage());
         }
     }
+
+    @GetMapping("/files/preview/{fileId}")
+    public ResponseEntity<?> previewFile(
+            @PathVariable String fileId)
+            throws MalformedURLException {
+
+        try {
+            Resource resource = fileService.downloadFile(fileId);
+            String filename = resource.getFilename();
+            if (filename == null) filename = "file";
+            filename = filename.toLowerCase();
+            
+            MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+            if (filename.endsWith(".pdf")) {
+                mediaType = MediaType.APPLICATION_PDF;
+            } else if (filename.endsWith(".png")) {
+                mediaType = MediaType.IMAGE_PNG;
+            } else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+                mediaType = MediaType.IMAGE_JPEG;
+            } else if (filename.endsWith(".gif")) {
+                mediaType = MediaType.IMAGE_GIF;
+            } else if (filename.endsWith(".mp4")) {
+                mediaType = MediaType.valueOf("video/mp4");
+            } else if (filename.endsWith(".webm")) {
+                mediaType = MediaType.valueOf("video/webm");
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("File not found")) {
+                return ResponseEntity.notFound().build();
+            }
+            if (e.getMessage().equals("Unauthorized")) {
+                return ResponseEntity.status(403).body("Unauthorized");
+            }
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

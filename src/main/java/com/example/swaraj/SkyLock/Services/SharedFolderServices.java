@@ -23,12 +23,14 @@ public class SharedFolderServices {
     private FolderRepo folderRepo;
     private SharedFileRepo sharedFileRepo;
     private SharedFolderRepo sharedFolderRepo;
+    private final EmailServices emailServices;
 
-    public SharedFolderServices(UsersRepo usersRepo, FolderRepo folderRepo, SharedFileRepo sharedFileRepo, SharedFolderRepo sharedFolderRepo) {
+    public SharedFolderServices(UsersRepo usersRepo, FolderRepo folderRepo, SharedFileRepo sharedFileRepo, SharedFolderRepo sharedFolderRepo, EmailServices emailServices) {
         this.usersRepo = usersRepo;
         this.folderRepo = folderRepo;
         this.sharedFileRepo = sharedFileRepo;
         this.sharedFolderRepo = sharedFolderRepo;
+        this.emailServices = emailServices;
     }
 
     public Users getCurrentUser(){
@@ -40,7 +42,7 @@ public class SharedFolderServices {
     }
 
     @Transactional
-    public void giveAccess(String id, String  usernameOrEmail, String role){
+    public void giveAccess(String id, String  usernameOrEmail, String role) throws jakarta.mail.MessagingException, java.io.IOException {
         Users user = getCurrentUser();
         Users sharedUser = usersRepo.findByUsernameOrEmail(usernameOrEmail,usernameOrEmail);
         if(sharedUser == null){
@@ -68,6 +70,10 @@ public class SharedFolderServices {
         sharedFolder.setRole(role != null ? role : "viewer");
 
         sharedFolderRepo.save(sharedFolder);
+
+        String descrption = "Folder is shared with you";
+        String folderLink = "http://skylock.dpdns.org/home?view=shared&folderId=" + folder.getId();
+//        emailServices.sharedFolderEmail(user.getUsername(), user.getEmail(), descrption, sharedUser.getEmail(), folder.getName(), folderLink);
     }
 
     public List<Map<String, Object>> getSharedWithMe() {
@@ -92,5 +98,58 @@ public class SharedFolderServices {
         }
 
         return folderList;
+    }
+
+    public List<Map<String, Object>> getSharesForFolder(String folderId) {
+        Users user = getCurrentUser();
+        Folder folder = folderRepo.findByIdIs(folderId);
+        if (folder == null) throw new RuntimeException("Folder is not found");
+        if (!folder.getOwner().getId().equals(user.getId())) throw new RuntimeException("user is not Authorized");
+
+        List<SharedFolder> sharedFolders = sharedFolderRepo.findByFolder(folder);
+        List<Map<String, Object>> shares = new ArrayList<>();
+        for (SharedFolder sf : sharedFolders) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", sf.getId());
+            map.put("email", sf.getSharedWith().getEmail());
+            map.put("name", sf.getSharedWith().getUsername());
+            map.put("role", sf.getRole());
+            shares.add(map);
+        }
+        return shares;
+    }
+
+    @Transactional
+    public void updateShareRole(String shareId, String newRole) {
+        Users user = getCurrentUser();
+        java.util.Optional<SharedFolder> opt = sharedFolderRepo.findById(shareId);
+        if (opt.isEmpty()) throw new RuntimeException("Share not found");
+        SharedFolder sharedFolder = opt.get();
+        if (!sharedFolder.getFolder().getOwner().getId().equals(user.getId())) throw new RuntimeException("user is not Authorized");
+        
+        sharedFolder.setRole(newRole);
+        sharedFolderRepo.save(sharedFolder);
+    }
+
+    @Transactional
+    public void removeShare(String shareId) {
+        Users user = getCurrentUser();
+        java.util.Optional<SharedFolder> opt = sharedFolderRepo.findById(shareId);
+        if (opt.isEmpty()) throw new RuntimeException("Share not found");
+        SharedFolder sharedFolder = opt.get();
+        if (!sharedFolder.getFolder().getOwner().getId().equals(user.getId())) throw new RuntimeException("user is not Authorized");
+        
+        sharedFolderRepo.delete(sharedFolder);
+    }
+
+    @Transactional
+    public void updateGeneralAccess(String folderId, String access) {
+        Users user = getCurrentUser();
+        Folder folder = folderRepo.findByIdIs(folderId);
+        if (folder == null) throw new RuntimeException("Folder is not found");
+        if (!folder.getOwner().getId().equals(user.getId())) throw new RuntimeException("user is not Authorized");
+        
+        folder.setGeneralAccess(access);
+        folderRepo.save(folder);
     }
 }

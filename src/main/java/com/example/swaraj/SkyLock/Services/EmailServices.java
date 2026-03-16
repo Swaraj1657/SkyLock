@@ -118,5 +118,6 @@ public class EmailServices {
         helper.setText(body, true);
 
         mailSender.send(message);
+        System.out.println("Message is sent");
     }
 }

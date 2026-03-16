@@ -103,4 +103,59 @@ public class SharedFileService {
 
         return fileList;
     }
+
+    public List<Map<String, Object>> getSharesForFile(String fileId) {
+        Users user = getCurrentUser();
+        Optional<FileEntity> opt = fileRepo.findById(fileId);
+        if (opt.isEmpty()) throw new RuntimeException("File is not found");
+        FileEntity file = opt.get();
+        if (!file.getOwner().getId().equals(user.getId())) throw new RuntimeException("user is not Authorized");
+
+        List<SharedFile> sharedFiles = sharedFileRepo.findByFile(file);
+        List<Map<String, Object>> shares = new ArrayList<>();
+        for (SharedFile sf : sharedFiles) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", sf.getId());
+            map.put("email", sf.getSharedwith().getEmail());
+            map.put("name", sf.getSharedwith().getUsername());
+            map.put("role", sf.getRole());
+            shares.add(map);
+        }
+        return shares;
+    }
+
+    @Transactional
+    public void updateShareRole(String shareId, String newRole) {
+        Users user = getCurrentUser();
+        Optional<SharedFile> opt = sharedFileRepo.findById(shareId);
+        if (opt.isEmpty()) throw new RuntimeException("Share not found");
+        SharedFile sharedFile = opt.get();
+        if (!sharedFile.getFile().getOwner().getId().equals(user.getId())) throw new RuntimeException("user is not Authorized");
+        
+        sharedFile.setRole(newRole);
+        sharedFileRepo.save(sharedFile);
+    }
+
+    @Transactional
+    public void removeShare(String shareId) {
+        Users user = getCurrentUser();
+        Optional<SharedFile> opt = sharedFileRepo.findById(shareId);
+        if (opt.isEmpty()) throw new RuntimeException("Share not found");
+        SharedFile sharedFile = opt.get();
+        if (!sharedFile.getFile().getOwner().getId().equals(user.getId())) throw new RuntimeException("user is not Authorized");
+        
+        sharedFileRepo.delete(sharedFile);
+    }
+
+    @Transactional
+    public void updateGeneralAccess(String fileId, String access) {
+        Users user = getCurrentUser();
+        Optional<FileEntity> opt = fileRepo.findById(fileId);
+        if (opt.isEmpty()) throw new RuntimeException("File is not found");
+        FileEntity file = opt.get();
+        if (!file.getOwner().getId().equals(user.getId())) throw new RuntimeException("user is not Authorized");
+        
+        file.setGeneralAccess(access);
+        fileRepo.save(file);
+    }
 }

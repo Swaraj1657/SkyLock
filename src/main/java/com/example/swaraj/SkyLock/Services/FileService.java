@@ -7,6 +7,7 @@ import com.example.swaraj.SkyLock.Models.Folder;
 import com.example.swaraj.SkyLock.Models.Users;
 import com.example.swaraj.SkyLock.Repo.FileRepo;
 import com.example.swaraj.SkyLock.Repo.FolderRepo;
+import com.example.swaraj.SkyLock.Repo.SharedFileRepo;
 import com.example.swaraj.SkyLock.Repo.UsersRepo;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +38,17 @@ public class FileService {
     private UsersRepo usersRepo;
     private FileRepo fileRepo;
     private FolderRepo folderRepo;
+    private SharedFileRepo sharedFileRepo;
 
-    public FileService(UsersRepo usersRepo, FileRepo fileRepo, FolderRepo folderRepo) {
+    public FileService(UsersRepo usersRepo, FileRepo fileRepo, FolderRepo folderRepo, SharedFileRepo sharedFileRepo) {
         this.usersRepo = usersRepo;
         this.fileRepo = fileRepo;
         this.folderRepo = folderRepo;
+        this.sharedFileRepo = sharedFileRepo;
+    }
+
+    public Optional<FileEntity> findById(String id){
+        return fileRepo.findById(id);
     }
 
     private Users getCurrentUser() {
@@ -105,10 +112,10 @@ public class FileService {
                         new RuntimeException("File not found"));
 
 
-        if (!file.getOwner()
-                .getId()
-                .equals(user.getId())) {
+        boolean isOwner = file.getOwner().getId().equals(user.getId());
+        boolean isSharedWithUs = sharedFileRepo.existsByFileAndSharedwith(file, user);
 
+        if (!isOwner && !isSharedWithUs) {
             throw new RuntimeException("Unauthorized");
         }
 

@@ -13,4 +13,5 @@ public interface SharedFolderRepo extends JpaRepository<SharedFolder,String> {
     List<SharedFolder> findBySharedWith(Users sharedWith);
 
     boolean existsByFolderAndSharedWith(Folder folder, Users sharedWith);
+    List<SharedFolder> findByFolder(Folder folder);
 }

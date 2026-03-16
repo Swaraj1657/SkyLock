@@ -118,8 +118,7 @@
                     body: JSON.stringify({ email: email, role: 'viewer' }),
                 }
             );
-            sharedPeople.push({ email: email, role: 'viewer', name: email.split('@')[0] });
-            renderPeopleList();
+            await loadShares();
             input.value = '';
             skylock.showToast('Access granted to ' + email, 'success');
         } catch (e) {

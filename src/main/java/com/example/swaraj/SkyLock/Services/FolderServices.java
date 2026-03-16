@@ -22,6 +22,10 @@ public class FolderServices {
     private final UsersRepo usersRepo;
     private final FolderRepo folderRepo;
 
+    public Folder findByIdIs(String id){
+        return folderRepo.findByIdIs(id);
+    }
+
     public FolderServices(FolderRepo folderRepo, UsersRepo usersRepo) {
         this.folderRepo = folderRepo;
         this.usersRepo = usersRepo;

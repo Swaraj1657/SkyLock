@@ -32,8 +32,16 @@
         // Download link
         const dlBtn = document.getElementById('btn-download');
         dlBtn.onclick = () => {
-            window.location.href = '/api/files/download/' + file.id;
+            skylock.downloadFile(file);
         };
+
+        // Preview link
+        const previewBtn = document.getElementById('btn-preview');
+        if (previewBtn) {
+            previewBtn.onclick = () => {
+                skylock.previewFile(file);
+            };
+        }
 
         // Share button
         const shareBtn = document.getElementById('btn-share-inspector');

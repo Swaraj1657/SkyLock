@@ -33,4 +33,7 @@ public class Folder {
 
     @OneToMany(mappedBy = "folder", cascade = CascadeType.ALL)
     private List<FileEntity> files;
+
+    @Column(columnDefinition = "varchar(255) default 'restricted'")
+    private String generalAccess = "restricted";
 }

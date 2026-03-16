@@ -13,4 +13,5 @@ public interface SharedFileRepo extends JpaRepository<SharedFile,String> {
 
     boolean existsByFileAndSharedwith(FileEntity file, Users sharedwith);
     List<SharedFile> findBySharedwith(Users sharedwith);
+    List<SharedFile> findByFile(FileEntity file);
 }

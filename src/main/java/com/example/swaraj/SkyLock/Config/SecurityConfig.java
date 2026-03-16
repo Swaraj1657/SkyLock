@@ -38,7 +38,8 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/logout",
                                 "/forgotPassword",
-                                "/resetPassword"
+                                "/resetPassword",
+                                "/api/public/**"
                         ).permitAll()
                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

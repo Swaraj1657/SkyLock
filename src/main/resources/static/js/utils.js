@@ -63,3 +63,67 @@ skylock.escapeHtml = function (str) {
     div.textContent = str;
     return div.innerHTML;
 };
+
+// ── File Actions ──────────────────────────────────
+skylock.downloadFile = async function (fileOrId) {
+    const fileId = typeof fileOrId === 'object' ? fileOrId.id : fileOrId;
+    if (!fileId) return;
+    
+    skylock.showToast('Starting download...', 'success');
+    
+    const isPublicPage = window.location.href.includes('/public') || window.location.href.includes('anyone');
+    let endpoint = isPublicPage ? `/api/public/files/download/${fileId}` : `/api/files/download/${fileId}`;
+
+    try {
+        let res = await fetch(endpoint, { method: 'HEAD', credentials: 'same-origin' });
+        
+        // Fallback to public if unauthorized on regular api
+        if (!res.ok && (res.status === 403 || res.status === 401) && !isPublicPage) {
+            endpoint = `/api/public/files/download/${fileId}`;
+            res = await fetch(endpoint, { method: 'HEAD', credentials: 'same-origin' });
+        }
+
+        if (!res.ok) {
+            if (res.status === 403 || res.status === 401) {
+                skylock.showToast('Unauthorized: You do not have permission to download this file', 'error');
+            } else {
+                skylock.showToast('Failed to download file', 'error');
+            }
+            return;
+        }
+        
+        window.location.href = endpoint;
+    } catch (e) {
+        skylock.showToast('Network error during download', 'error');
+    }
+};
+
+skylock.previewFile = async function (fileOrId) {
+    const fileId = typeof fileOrId === 'object' ? fileOrId.id : fileOrId;
+    if (!fileId) return;
+
+    const isPublicPage = window.location.href.includes('/public') || window.location.href.includes('anyone');
+    let endpoint = isPublicPage ? `/api/public/files/preview/${fileId}` : `/api/files/preview/${fileId}`;
+
+    try {
+        let res = await fetch(endpoint, { method: 'HEAD', credentials: 'same-origin' });
+        
+        // Fallback to public if unauthorized
+        if (!res.ok && (res.status === 403 || res.status === 401) && !isPublicPage) {
+            endpoint = `/api/public/files/preview/${fileId}`;
+            res = await fetch(endpoint, { method: 'HEAD', credentials: 'same-origin' });
+        }
+
+        if (!res.ok) {
+            if (res.status === 403 || res.status === 401) {
+                skylock.showToast('Unauthorized: You do not have permission to preview this file', 'error');
+            } else {
+                skylock.showToast('Failed to preview file', 'error');
+            }
+            return;
+        }
+        window.open(endpoint, '_blank');
+    } catch (e) {
+        skylock.showToast('Network error', 'error');
+    }
+};

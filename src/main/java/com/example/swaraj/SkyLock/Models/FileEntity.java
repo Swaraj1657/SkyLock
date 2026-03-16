@@ -36,4 +36,7 @@ public class FileEntity {
     private Folder folder;
 
     private LocalDateTime uploadedAt;
+
+    @Column(columnDefinition = "varchar(255) default 'restricted'")
+    private String generalAccess = "restricted";
 }
